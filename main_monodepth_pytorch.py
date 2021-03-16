@@ -148,14 +148,11 @@ class Model:
             args.batch_size = 1
 
         # Load data
-        self.output_directory = args.output_directory
+        self.n_img=1
         self.input_height = args.input_height
         self.input_width = args.input_width
 
-        self.n_img, self.loader = prepare_dataloader(args.data_dir, args.mode, args.augment_parameters,
-                                                     args.do_augmentation, args.batch_size,
-                                                     (args.input_height, args.input_width),
-                                                     args.num_workers)
+ 
 
 
         if 'cuda' in self.device:
@@ -280,31 +277,27 @@ class Model:
     def load(self, path):
         self.model.load_state_dict(torch.load(path))
 
-    def test(self):
+    def test(self,data):
         self.model.eval()
-        disparities = np.zeros((self.n_img,
+        disparities = np.zeros((
                                self.input_height, self.input_width),
                                dtype=np.float32)
-        disparities_pp = np.zeros((self.n_img,
+        disparities_pp = np.zeros((
                                   self.input_height, self.input_width),
                                   dtype=np.float32)
         with torch.no_grad():
-            for (i, data) in enumerate(self.loader):
-                # Get the inputs
+          
                 data = to_device(data, self.device)
                 left = data.squeeze()
                 # Do a forward pass
                 disps = self.model(left)
                 disp = disps[0][:, 0, :, :].unsqueeze(1)
-                disparities[i] = disp[0].squeeze().cpu().numpy()
-                disparities_pp[i] = \
+                disparities = disp[0].squeeze().cpu().numpy()
+                disparities_pp= \
                     post_process_disparity(disps[0][:, 0, :, :]\
                                            .cpu().numpy())
 
-        np.save(self.output_directory + '/disparities.npy', disparities)
-        np.save(self.output_directory + '/disparities_pp.npy',
-                disparities_pp)
-        print('Finished Testing')
+        return disparities,disparities_pp
 
 
 def main(args):

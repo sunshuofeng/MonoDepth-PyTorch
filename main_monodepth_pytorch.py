@@ -288,10 +288,10 @@ class Model:
         with torch.no_grad():
           
                 data = to_device(data, self.device)
-                left = data.unsqueeze(0)
+                left = data.squeeze()
                 # Do a forward pass
                 disps = self.model(left)
-                print(disps[0].shape)
+                
                 disp = disps[0][:, 0, :, :].unsqueeze(1)
                 disparities = disp[0].squeeze().cpu().numpy()
                 disparities_pp= \

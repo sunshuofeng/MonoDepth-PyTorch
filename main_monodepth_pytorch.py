@@ -288,7 +288,7 @@ class Model:
         with torch.no_grad():
           
                 data = to_device(data, self.device)
-                left = data.squeeze()
+                left = data.unsqueeze(0)
                 # Do a forward pass
                 disps = self.model(left)
                 disp = disps[0][:, 0, :, :].unsqueeze(1)
